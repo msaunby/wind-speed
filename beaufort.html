@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<head>
+  <title>some recent wind speeds at Mount Batten</title>
+  <meta charset="utf-8">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+  <script src="numberToEnglish.js"></script>
+</head>
+<body>
+  <p id="3827"></p>
+  <script>
+
+  var ordinal_date = ["","first",
+  "second",
+  "third",
+  "fourth",
+  "fifth",
+  "sixth",
+  "seventh",
+  "eighth",
+  "ninth",
+  "tenth",
+  "eleventh",
+  "twelfth",
+  "thirteenth",
+  "fourteenth",
+  "fifteenth",
+  "sixteenth",
+  "seventeenth",
+  "eighteenth",
+  "nineteenth",
+  "twentieth",
+  "twenty first",
+  "twenty second",
+  "twenty third",
+  "twenty fourth",
+  "twenty fifth",
+  "twenty sixth",
+  "twenty seventh",
+  "twenty eighth",
+  "twenty ninth",
+  "thirtieth",
+  "thirty first"]
+
+  var beaufort_scale = [
+  [0, 'calm',0],
+  [2, 'light air',1],
+  [5, 'light breeze',2],
+  [9, 'gentle breeze',3],
+  [13, 'moderate breeze',4],
+  [19, 'fresh breeze',5],
+  [24, 'strong breeze',6],
+  [30, 'near gale',7],
+  [37, 'gale',8],
+  [44, 'strong gale',9],
+  [52, 'storm',10],
+  [60,  'violent storm',11],
+  [1000, 'hurricane',12]];
+  
+  function mph_to_beaufort(mph){
+    var knots = 0.869 * mph;
+    for(i=0;i<13;i++){
+      var b = beaufort_scale[i]
+      if(knots < b[0]){
+        return(i-1);
+      }
+    }
+    return 12;		 
+  }		 
+  
+  function wind_observations(station, doc_id){
+    $.ajax({url: "http://www.wetoffice.com/obs", crossDomain: true,
+      data:{id:station,param:'S'}, dataType: "json"}).done(
+      function(data){
+        $(doc_id).append(" " + data[0].title);
+        data[0].rep.forEach(function(v){
+          var date = new Date(v[0]);
+          var hours = date.getHours();
+          var day = ordinal_date[date.getDate()];
+          var time = "At " +  numberToEnglish(hours) + " hundred hours on the " + day;
+	  var speed = numberToEnglish(v[1]);
+	  var beaufort = mph_to_beaufort(v[1]);	 
+          //$(doc_id).append("<br>" + time + " the wind speed was " + speed + " miles per hour. ");
+          $(doc_id).append("<br>" + time + " " + beaufort_scale[beaufort][1] + ".");	 
+        })
+        //console.log(data)
+      });
+    }
+
+    $(function(){
+        wind_observations("3827", "#3827");
+    })
+    </script>
+  </body>
+  </html>
